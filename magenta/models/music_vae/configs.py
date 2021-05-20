@@ -386,6 +386,58 @@ CONFIG_MAP['hierdec-mel_16bar'] = Config(
     eval_examples_path=None,
 )
 
+CONFIG_MAP['hierdec-mel_16bar_tap_fixed_velocity'] = Config(
+    model=MusicVAE(
+        lstm_models.BidirectionalLstmEncoder(),
+        lstm_models.GrooveLstmDecoder()),
+    hparams=merge_hparams(
+        lstm_models.get_default_hparams(),
+        HParams(
+            batch_size=512,
+            max_seq_len=256,
+            z_size=512,
+            enc_rnn_size=[2048, 2048],
+            dec_rnn_size=[1024, 1024],
+            free_bits=256,
+            max_beta=0.2,
+        )),
+    note_sequence_augmenter=None,
+    data_converter=data.GrooveConverter(
+        split_bars=2, steps_per_quarter=4, quarters_per_bar=4,
+        max_tensors_per_notesequence=20, tapify=True, fixed_velocities=True,
+        pitch_classes=data.FULL_PIANO_PITCH_CLASSES),
+    train_examples_path=None,
+    eval_examples_path=None,
+)
+
+CONFIG_MAP['hierdec-mel_16bar_tap_fixed_velocity_note_dropout'] = Config(
+    model=MusicVAE(
+        lstm_models.BidirectionalLstmEncoder(),
+        lstm_models.HierarchicalLstmDecoder(
+            lstm_models.CategoricalLstmDecoder(),
+            level_lengths=[16, 16],
+            disable_autoregression=True)),
+    hparams=merge_hparams(
+        lstm_models.get_default_hparams(),
+        HParams(
+            batch_size=512,
+            max_seq_len=256,
+            z_size=512,
+            enc_rnn_size=[2048, 2048],
+            dec_rnn_size=[1024, 1024],
+            free_bits=256,
+            max_beta=0.2,
+        )),
+    note_sequence_augmenter=None,
+    data_converter=data.GrooveConverter(
+        split_bars=2, steps_per_quarter=4, quarters_per_bar=4,
+        max_tensors_per_notesequence=20, tapify=True, fixed_velocities=True,
+        pitch_classes=data.FULL_PIANO_PITCH_CLASSES,
+        max_note_dropout_probability=0.8),
+    train_examples_path=None,
+    eval_examples_path=None,
+)
+
 CONFIG_MAP['hier-mel_16bar'] = Config(
     model=MusicVAE(
         lstm_models.HierarchicalLstmEncoder(
