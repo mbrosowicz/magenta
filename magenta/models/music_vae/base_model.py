@@ -262,13 +262,17 @@ class MusicVAE(object):
             * hparams.max_beta)
     self.loss = tf.reduce_mean(r_loss) + beta * tf.reduce_mean(kl_cost)
 
-    scalars_to_summarize = {
-        'loss': self.loss,
-        'losses/r_loss': r_loss,
-        'losses/kl_loss': kl_cost,
-        'losses/kl_bits': kl_div / tf.math.log(2.0),
-        'losses/kl_beta': beta,
-    }
+    # scalars_to_summarize = {
+    #     'loss': self.loss,
+    #     'losses/r_loss': r_loss,
+    #     'losses/kl_loss': kl_cost,
+    #     'losses/kl_bits': kl_div / tf.math.log(2.0),
+    #     'losses/kl_beta': beta,
+    # }
+
+    scalars_to_summarize = {'loss': self.loss}
+    scalars_to_summarize.update(metric_map)
+
     return metric_map, scalars_to_summarize
 
   def train(self, input_sequence, output_sequence, sequence_length,

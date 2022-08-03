@@ -73,6 +73,10 @@ ROLAND_DRUM_PITCH_CLASSES = [
     [51, 53, 59]
 ]
 
+FULL_PIANO_PITCH_CLASSES = [
+    [p] for p in range(0, 128)
+]
+
 OUTPUT_VELOCITY = 80
 
 CHORD_SYMBOL = note_seq.NoteSequence.TextAnnotation.CHORD_SYMBOL
@@ -1660,8 +1664,8 @@ class GrooveConverter(BaseNoteSequenceConverter):
           # Create a new note
           if hits[j] > 0.5:
             note = note_sequence.notes.add()
-            note.instrument = 9  # All drums are instrument 9
-            note.is_drum = True
+            note.instrument = 1  # All drums are instrument 9
+            note.is_drum = False
             pitch = self.pitch_classes[j][0]
             note.pitch = pitch
             if self._categorical_outputs:

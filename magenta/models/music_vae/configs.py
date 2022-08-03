@@ -32,16 +32,17 @@ class Config(collections.namedtuple(
     ['model', 'hparams', 'note_sequence_augmenter', 'data_converter',
      'train_examples_path', 'eval_examples_path', 'tfds_name'])):
 
-  def values(self):
-    return self._asdict()
+    def values(self):
+        return self._asdict()
+
 
 Config.__new__.__defaults__ = (None,) * len(Config._fields)
 
 
 def update_config(config, update_dict):
-  config_dict = config.values()
-  config_dict.update(update_dict)
-  return Config(**config_dict)
+    config_dict = config.values()
+    config_dict.update(update_dict)
+    return Config(**config_dict)
 
 
 CONFIG_MAP = {}
@@ -65,7 +66,8 @@ CONFIG_MAP['cat-mel_2bar_small'] = Config(
             sampling_schedule='inverse_sigmoid',
             sampling_rate=1000,
         )),
-    note_sequence_augmenter=data.NoteSequenceAugmenter(transpose_range=(-5, 5)),
+    note_sequence_augmenter=data.NoteSequenceAugmenter(
+        transpose_range=(-5, 5)),
     data_converter=data.OneHotMelodyConverter(
         valid_programs=data.MEL_PROGRAMS,
         skip_polyphony=False,
@@ -93,7 +95,8 @@ CONFIG_MAP['cat-mel_2bar_big'] = Config(
             sampling_schedule='inverse_sigmoid',
             sampling_rate=1000,
         )),
-    note_sequence_augmenter=data.NoteSequenceAugmenter(transpose_range=(-5, 5)),
+    note_sequence_augmenter=data.NoteSequenceAugmenter(
+        transpose_range=(-5, 5)),
     data_converter=data.OneHotMelodyConverter(
         valid_programs=data.MEL_PROGRAMS,
         skip_polyphony=False,
@@ -117,7 +120,8 @@ CONFIG_MAP['cat-mel_2bar_med_chords'] = Config(
             enc_rnn_size=[1024],
             dec_rnn_size=[512, 512, 512],
         )),
-    note_sequence_augmenter=data.NoteSequenceAugmenter(transpose_range=(-3, 3)),
+    note_sequence_augmenter=data.NoteSequenceAugmenter(
+        transpose_range=(-3, 3)),
     data_converter=data.OneHotMelodyConverter(
         max_bars=100,
         slice_bars=2,
@@ -471,7 +475,8 @@ CONFIG_MAP['hier-multiperf_vel_1bar_big'] = Config(
 CONFIG_MAP['hier-multiperf_vel_1bar_med_chords'] = Config(
     model=MusicVAE(multiperf_encoder, multiperf_decoder),
     hparams=multiperf_hparams_med,
-    note_sequence_augmenter=data.NoteSequenceAugmenter(transpose_range=(-3, 3)),
+    note_sequence_augmenter=data.NoteSequenceAugmenter(
+        transpose_range=(-3, 3)),
     data_converter=data_hierarchical.MultiInstrumentPerformanceConverter(
         num_velocity_bins=8,
         hop_size_bars=1,
@@ -486,7 +491,8 @@ CONFIG_MAP['hier-multiperf_vel_1bar_med_chords'] = Config(
 CONFIG_MAP['hier-multiperf_vel_1bar_big_chords'] = Config(
     model=MusicVAE(multiperf_encoder, multiperf_decoder),
     hparams=multiperf_hparams_big,
-    note_sequence_augmenter=data.NoteSequenceAugmenter(transpose_range=(-3, 3)),
+    note_sequence_augmenter=data.NoteSequenceAugmenter(
+        transpose_range=(-3, 3)),
     data_converter=data_hierarchical.MultiInstrumentPerformanceConverter(
         num_velocity_bins=8,
         hop_size_bars=1,
@@ -569,6 +575,52 @@ CONFIG_MAP['groovae_2bar_tap_fixed_velocity'] = Config(
         pitch_classes=data.ROLAND_DRUM_PITCH_CLASSES,
         inference_pitch_classes=data.REDUCED_DRUM_PITCH_CLASSES),
     tfds_name='groove/2bar-midionly'
+)
+
+CONFIG_MAP['groovae_2bar_melody_tap'] = Config(
+    model=MusicVAE(lstm_models.BidirectionalLstmEncoder(),
+                   lstm_models.GrooveLstmDecoder()),
+    hparams=merge_hparams(
+        lstm_models.get_default_hparams(),
+        HParams(
+            batch_size=512,
+            max_seq_len=16 * 2,  # 2 bars w/ 16 steps per bar
+            z_size=256,
+            enc_rnn_size=[512],
+            dec_rnn_size=[256, 256],
+            max_beta=0.2,
+            dropout_keep_prob=0.3,
+            sampling_schedule='inverse_sigmoid',
+            sampling_rate=1000,
+        )),
+    note_sequence_augmenter=None,
+    data_converter=data.GrooveConverter(
+        split_bars=2, steps_per_quarter=4, quarters_per_bar=4,
+        max_tensors_per_notesequence=20, tapify=True,
+        pitch_classes=data.FULL_PIANO_PITCH_CLASSES)
+)
+
+CONFIG_MAP['groovae_2bar_melody_tap_fixed_velocity'] = Config(
+    model=MusicVAE(lstm_models.BidirectionalLstmEncoder(),
+                   lstm_models.GrooveLstmDecoder()),
+    hparams=merge_hparams(
+        lstm_models.get_default_hparams(),
+        HParams(
+            batch_size=512,
+            max_seq_len=16 * 2,  # 2 bars w/ 16 steps per bar
+            z_size=256,
+            enc_rnn_size=[512],
+            dec_rnn_size=[256, 256],
+            max_beta=0.2,
+            dropout_keep_prob=0.3,
+            sampling_schedule='inverse_sigmoid',
+            sampling_rate=1000,
+        )),
+    note_sequence_augmenter=None,
+    data_converter=data.GrooveConverter(
+        split_bars=2, steps_per_quarter=4, quarters_per_bar=4,
+        max_tensors_per_notesequence=20, tapify=True, fixed_velocities=True,
+        pitch_classes=data.FULL_PIANO_PITCH_CLASSES)
 )
 
 CONFIG_MAP['groovae_2bar_tap_fixed_velocity_note_dropout'] = Config(
